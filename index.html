@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A personal task journal with due dates, saved to your account.">
+  <meta name="theme-color" content="#eef3f4">
+  <title>Personal Task</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%230d2833'/%3E%3Ctext x='16' y='22' text-anchor='middle' font-size='15' font-family='Arial,sans-serif' fill='%23d7f3ee'%3EP%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script>
+    try {
+      var theme = localStorage.getItem("yoman.theme");
+      if (theme === "light" || theme === "dark") {
+        document.documentElement.setAttribute("data-theme", theme);
+      }
+    } catch (error) {}
+  </script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <section id="screen-boot" class="auth-screen" aria-labelledby="boot-heading">
+    <div class="auth-card">
+      <div class="auth-mark" aria-hidden="true">P</div>
+      <p class="auth-kicker">Personal Task</p>
+      <h1 id="boot-heading">Personal Task</h1>
+      <p id="boot-status" class="auth-lead">Checking your session…</p>
+    </div>
+  </section>
+
+  <section id="screen-login" class="auth-screen" hidden aria-labelledby="login-heading">
+    <form id="login-form" class="auth-card" novalidate>
+      <div class="auth-mark" aria-hidden="true">P</div>
+      <p class="auth-kicker">Personal Task</p>
+      <h1 id="login-heading">Welcome Back</h1>
+      <p class="auth-lead">Sign in to open your journal.</p>
+
+      <label class="field" for="login-email">
+        <span class="field-label">Email Address</span>
+        <input id="login-email" name="email" type="email" autocomplete="username" inputmode="email" maxlength="120" required>
+      </label>
+
+      <label class="field" for="login-password">
+        <span class="field-label">Password</span>
+        <span class="password-field">
+          <input id="login-password" name="password" type="password" autocomplete="current-password" maxlength="128" required>
+          <button type="button" id="login-password-toggle" class="btn btn-ghost password-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+        </span>
+      </label>
+
+      <p id="login-error" class="error auth-error" role="alert"></p>
+      <button type="submit" id="login-submit" class="btn btn-primary">Sign In</button>
+
+      <p class="auth-switch">Don't have an account? <button type="button" id="login-to-signup">Sign Up</button></p>
+    </form>
+  </section>
+
+  <section id="screen-signup" class="auth-screen" hidden aria-labelledby="signup-heading">
+    <form id="signup-form" class="auth-card" novalidate>
+      <div class="auth-mark" aria-hidden="true">P</div>
+      <p class="auth-kicker">Personal Task</p>
+      <h1 id="signup-heading">Create Your Account</h1>
+      <p class="auth-lead">Create an account. Your tasks stay private to you.</p>
+
+      <label class="field" for="signup-name">
+        <span class="field-label">Full Name</span>
+        <input id="signup-name" name="name" type="text" autocomplete="name" maxlength="80" required>
+      </label>
+
+      <label class="field" for="signup-email">
+        <span class="field-label">Email Address</span>
+        <input id="signup-email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="120" required>
+      </label>
+
+      <label class="field" for="signup-password">
+        <span class="field-label">Password</span>
+        <span class="password-field">
+          <input id="signup-password" name="password" type="password" autocomplete="new-password" maxlength="128" required>
+          <button type="button" id="signup-password-toggle" class="btn btn-ghost password-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+        </span>
+      </label>
+
+      <label class="field" for="signup-confirm">
+        <span class="field-label">Confirm Password</span>
+        <span class="password-field">
+          <input id="signup-confirm" name="confirm" type="password" autocomplete="new-password" maxlength="128" required>
+          <button type="button" id="signup-confirm-toggle" class="btn btn-ghost password-toggle" aria-pressed="false" aria-label="Show password">Show</button>
+        </span>
+      </label>
+
+      <p id="signup-error" class="error auth-error" role="alert"></p>
+      <button type="submit" id="signup-submit" class="btn btn-primary">Create Account</button>
+
+      <p class="auth-switch">Already have an account? <button type="button" id="signup-to-login">Sign In</button></p>
+    </form>
+  </section>
+
+  <div id="drawer-backdrop" class="drawer-backdrop"></div>
+  <div class="layout" id="journal" hidden>
+    <aside class="sidebar" aria-label="Journal navigation">
+      <div class="logo">
+        <button type="button" id="menu-toggle" class="menu-toggle" aria-expanded="false" aria-controls="drawer">Menu</button>
+        <div class="logo-stamp" aria-hidden="true">
+          <span id="logo-month"></span>
+          <strong id="logo-day"></strong>
+        </div>
+        <div>
+          <h1>Personal Task</h1>
+          <p id="logo-sub" class="logo-sub">My tasks</p>
+        </div>
+      </div>
+      <div id="drawer" class="drawer">
+        <div class="drawer-head">
+          <p class="drawer-title">Menu</p>
+          <button type="button" id="drawer-close" class="btn btn-ghost">Close</button>
+        </div>
+        <div id="today-card"></div>
+        <nav id="nav" aria-label="Views"></nav>
+
+        <section class="cat-section" aria-labelledby="cat-heading">
+          <h2 id="cat-heading">Categories</h2>
+          <div id="cats" class="cats"></div>
+        </section>
+      </div>
+
+      <div class="side-footer">
+        <button type="button" id="clear-done" class="btn btn-ghost">Clear completed</button>
+        <div class="footer-row">
+          <button type="button" id="export-btn" class="btn btn-ghost">Export</button>
+          <button type="button" id="import-btn" class="btn btn-ghost">Import</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden>
+        </div>
+        <p class="storage-note">Tasks are saved to your account and stay available on every device.</p>
+      </div>
+    </aside>
+
+    <main id="main">
+      <div class="stage">
+      <div class="hero">
+        <div>
+          <p class="kicker">Your journal</p>
+          <p class="greeting" id="greeting"></p>
+          <p class="lede" id="lede"></p>
+        </div>
+        <div class="hero-tools">
+          <button type="button" id="theme-toggle" class="btn btn-ghost" aria-pressed="false">Dark mode</button>
+          <button type="button" id="open-login" class="btn btn-primary">Sign out</button>
+        </div>
+      </div>
+
+      <section class="week" aria-labelledby="week-label">
+        <div class="week-bar">
+          <button type="button" id="week-prev" class="btn btn-ghost" aria-label="Previous week">Previous</button>
+          <p id="week-label"></p>
+          <button type="button" id="week-next" class="btn btn-ghost" aria-label="Next week">Next</button>
+          <button type="button" id="week-today" class="btn btn-ghost">Today</button>
+        </div>
+        <div id="week-days" class="week-days"></div>
+      </section>
+      </div>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <div class="composer-head">
+          <h2>New task</h2>
+          <p>Add a due date, for example the last day to pay a parking ticket.</p>
+        </div>
+
+        <label class="field" for="title">
+          <span class="field-label">What needs doing?</span>
+          <input id="title" name="title" type="text" maxlength="200" required placeholder="For example: pay a parking ticket" enterkeyhint="done">
+        </label>
+
+        <div class="options">
+          <fieldset class="date-field">
+            <legend>Due date</legend>
+            <div class="shortcuts" id="composer-shortcuts">
+              <button type="button" class="shortcut" data-offset="0">Today</button>
+              <button type="button" class="shortcut" data-offset="1">Tomorrow</button>
+              <button type="button" class="shortcut" data-offset="7">Next week</button>
+              <button type="button" class="shortcut" data-offset="clear" aria-pressed="true">No date</button>
+            </div>
+            <label class="sr" for="due">Choose a date</label>
+            <input id="due" name="due" type="date">
+          </fieldset>
+
+          <label class="choice" for="priority">
+            <span>Priority</span>
+            <select id="priority" name="priority">
+              <option value="low">Low</option>
+              <option value="medium" selected>Normal</option>
+              <option value="high">High</option>
+            </select>
+          </label>
+
+          <label class="choice" for="category">
+            <span>Category</span>
+            <select id="category" name="category"></select>
+          </label>
+        </div>
+
+        <div id="new-cat-wrap" class="extra" hidden>
+          <label for="new-category">
+            <span class="field-label">New category name</span>
+            <input id="new-category" type="text" maxlength="40" autocomplete="off">
+          </label>
+        </div>
+
+        <div id="notes-wrap" class="extra" hidden>
+          <label for="notes">
+            <span class="field-label">Note</span>
+            <textarea id="notes" maxlength="2000" rows="3" placeholder="Details, a reference number, a link, or anything worth remembering"></textarea>
+          </label>
+        </div>
+
+        <p id="composer-error" class="error" role="alert"></p>
+
+        <div class="composer-actions">
+          <button type="button" id="toggle-notes" class="btn btn-ghost" aria-expanded="false" aria-controls="notes-wrap">Add a note</button>
+          <button type="submit" class="btn btn-primary">Add task</button>
+        </div>
+        <p class="hint">Press Enter to add the task, then continue to the next one.</p>
+
+        <div id="suggestions" class="suggestions">
+          <p>Start with one of these</p>
+          <button type="button" class="chip" data-suggestion="parking">Parking ticket</button>
+          <button type="button" class="chip" data-suggestion="doctor">Doctor</button>
+          <button type="button" class="chip" data-suggestion="groceries">Groceries</button>
+        </div>
+      </form>
+
+      <section class="results" aria-labelledby="list-title">
+        <div class="list-head">
+          <h2 id="list-title" tabindex="-1"></h2>
+          <p id="list-count"></p>
+        </div>
+        <div id="list"></div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="editor" aria-labelledby="editor-heading" aria-describedby="editor-desc">
+    <form id="editor-form">
+      <div class="dialog-head">
+        <h2 id="editor-heading">Edit task</h2>
+        <button type="button" id="editor-close" class="btn btn-ghost">Close</button>
+      </div>
+      <p id="editor-desc" class="muted">Update the title, due date, priority, or note.</p>
+
+      <label class="field" for="editor-title-input">
+        <span class="field-label">What needs doing?</span>
+        <input id="editor-title-input" type="text" maxlength="200" required>
+      </label>
+
+      <fieldset class="date-field">
+        <legend>Due date</legend>
+        <div class="shortcuts" id="editor-shortcuts">
+          <button type="button" class="shortcut" data-offset="0">Today</button>
+          <button type="button" class="shortcut" data-offset="1">Tomorrow</button>
+          <button type="button" class="shortcut" data-offset="7">Next week</button>
+          <button type="button" class="shortcut" data-offset="clear">No date</button>
+        </div>
+        <label class="sr" for="editor-due">Choose a date</label>
+        <input id="editor-due" type="date">
+      </fieldset>
+
+      <div class="options">
+        <label class="choice" for="editor-priority">
+          <span>Priority</span>
+          <select id="editor-priority">
+            <option value="low">Low</option>
+            <option value="medium">Normal</option>
+            <option value="high">High</option>
+          </select>
+        </label>
+        <label class="choice" for="editor-category">
+          <span>Category</span>
+          <select id="editor-category"></select>
+        </label>
+      </div>
+
+      <div id="editor-new-wrap" class="extra" hidden>
+        <label for="editor-new-category">
+          <span class="field-label">New category name</span>
+          <input id="editor-new-category" type="text" maxlength="40" autocomplete="off">
+        </label>
+      </div>
+
+      <label class="field" for="editor-notes">
+        <span class="field-label">Note</span>
+        <textarea id="editor-notes" maxlength="2000" rows="4"></textarea>
+      </label>
+
+      <p id="editor-error" class="error" role="alert"></p>
+
+      <div class="dialog-actions">
+        <button type="button" id="editor-delete" class="btn btn-danger">Delete</button>
+        <button type="button" id="editor-cancel" class="btn btn-ghost">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status"></div>
+  <p id="live" class="sr" aria-live="polite"></p>
+  <noscript>JavaScript is required to use your journal.</noscript>
+  <script type="module" src="auth-api.js"></script>
+  <script type="module" src="signup.js"></script>
+  <script type="module" src="login.js"></script>
+  <script type="module" src="journal-api.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

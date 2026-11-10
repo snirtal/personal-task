@@ -1,0 +1,15 @@
+{
+  "name": "personal-task",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "bundle:auth": "esbuild vendor/entry.js --bundle --format=esm --platform=browser --legal-comments=none --outfile=vendor/neon-browser.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@neon/neon-js": "0.10.2"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  }
+}
